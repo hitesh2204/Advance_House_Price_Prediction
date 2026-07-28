@@ -107,6 +107,12 @@ class DataTransformation:
             logger.info(f"Final test array shape: {test_arr.shape}")
 
             logger.info("Training and Testing arrays created successfully.")    
+
+            return (
+                train_arr,
+                test_arr,
+                self.data_transformation_config.preprocessor_obj_file_path
+            )
         except Exception as e:
             logger.error(CustomException(e,sys))
             raise CustomException(e,sys)
