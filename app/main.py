@@ -1,5 +1,5 @@
 from fastapi import FastAPI
-from src.api.schema import HouseData
+from app.schema import HouseData
 import pickle
 import pandas as pd
 
