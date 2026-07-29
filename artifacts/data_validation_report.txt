@@ -1,0 +1,29 @@
+Train shape:(1168, 81)
+Test shape:(292, 81)
+Train missing values:Id                 0
+MSSubClass         0
+MSZoning           0
+LotFrontage      217
+LotArea            0
+                ... 
+MoSold             0
+YrSold             0
+SaleType           0
+SaleCondition      0
+SalePrice          0
+Length: 81, dtype: int64
+Test missing values:Id                0
+MSSubClass        0
+MSZoning          0
+LotFrontage      42
+LotArea           0
+                 ..
+MoSold            0
+YrSold            0
+SaleType          0
+SaleCondition     0
+SalePrice         0
+Length: 81, dtype: int64
+Train duplicated data:0
+Test duplicated data:0
+Data validation passed
