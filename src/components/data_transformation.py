@@ -20,9 +20,9 @@ class DataTransformationConfig:
 
     preprocessor_obj_file_path:str = os.path.join("artifacts","preprocessor.pkl")
 
-    train_processes_path:str = os.path.join("data","processed","train_processed.csv")
+    train_processed_path:str = os.path.join("data","processed","train_processed.csv")
 
-    test_processes_path:str = os.path.join("data","processed","test_processed.csv")
+    test_processed_path:str = os.path.join("data","processed","test_processed.csv")
 
 class DataTransformation:
 
@@ -112,18 +112,18 @@ class DataTransformation:
 
             logger.info("Training and Testing arrays created successfully.")    
 
-            os.makedirs(os.path.dirname(self.data_transformation_config.train_processes_path),exist_ok= True)
+            os.makedirs(os.path.dirname(self.data_transformation_config.train_processed_path),exist_ok= True)
 
-            pd.DataFrame(train_arr).to_csv(self.data_transformation_config.train_processes_path,index=False,header=True)
+            pd.DataFrame(train_arr).to_csv(self.data_transformation_config.train_processed_path,index=False,header=True)
 
-            pd.DataFrame(test_arr).to_csv(self.data_transformation_config.test_processes_path,index=False,header=True)
+            pd.DataFrame(test_arr).to_csv(self.data_transformation_config.test_processed_path,index=False,header=True)
 
             logger.info("Train and Test processed file created successfully")
             print("Train and Test processed file created successfully")
 
             return (
-                train_arr,
-                test_arr,
+                self.data_transformation_config.train_processed_path,
+                self.data_transformation_config.test_processed_path,
                 self.data_transformation_config.preprocessor_obj_file_path
             )
         except Exception as e:
