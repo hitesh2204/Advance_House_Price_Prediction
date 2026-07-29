@@ -7,7 +7,6 @@ from src.exception import CustomException
 from src.logger import logger
 from src.components.data_ingestion import DataIngestionConfig
 
-
 from dataclasses import dataclass
 
 
