@@ -46,19 +46,20 @@ def predict(data: HouseData):
 
         preprocess_data = preprocessor.transform(df)
 
-        logger.info("Successfully preprocess data")
+        logger.info("Successfully preprocessed data")
 
         prediction = model.predict(preprocess_data)
 
         logger.info("Prediction done successfully")
 
         return {
+            "status": "success",
             "prediction": float(prediction[0])
         }
     except Exception as e:
 
         logger.error(str(CustomException(e,sys)))
-        raise e
+        raise CustomException(e,sys)
 
         
 
