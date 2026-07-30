@@ -1,41 +1,100 @@
-# 🏠 Advanced House Price Prediction
+# 🏠 Advanced House Price Prediction API
 
-A production-style end-to-end Machine Learning project that predicts house prices using the Ames Housing dataset. This project follows a modular software architecture with separate components for data ingestion, validation, transformation, model training, evaluation, and prediction.
+A production-ready end-to-end Machine Learning project that predicts house prices using the **Ames Housing Dataset**. The project follows a modular software architecture and exposes the trained model through a **FastAPI REST API**. The entire application is containerized using **Docker**, making it portable and deployment-ready.
 
 ---
 
-## 📌 Project Overview
+# 🚀 Project Overview
 
-The objective of this project is to build a robust Machine Learning pipeline capable of predicting house prices based on various property features.
+The objective of this project is to build a scalable Machine Learning application capable of predicting house prices from various property features.
 
-The project is designed using industry-standard software engineering practices, including:
+The project follows industry-standard software engineering practices, including:
 
-* Modular project structure
+* Modular project architecture
 * Object-Oriented Programming (OOP)
-* Custom exception handling
-* Logging
-* Configuration management using dataclasses
 * Data preprocessing pipelines
+* Model training and evaluation
 * Model serialization
-* Reusable components
+* FastAPI REST API
+* Pydantic request validation
+* Docker containerization
+* Logging
+* Custom exception handling
 
 ---
 
-## 📂 Project Structure
+# 🏗 Project Architecture
+
+```text
+                        Training Pipeline
+
+                Raw Dataset
+                     │
+                     ▼
+              Data Ingestion
+                     │
+                     ▼
+             Data Validation
+                     │
+                     ▼
+          Data Transformation
+                     │
+                     ▼
+             Model Training
+                     │
+                     ▼
+            Model Evaluation
+                     │
+                     ▼
+        model.pkl + preprocessor.pkl
+                     │
+──────────────────────────────────────────────────────
+
+                  Inference Pipeline
+
+            FastAPI Prediction API
+                     │
+                     ▼
+             JSON Request Body
+                     │
+                     ▼
+          Pydantic Validation
+                     │
+                     ▼
+             Pandas DataFrame
+                     │
+                     ▼
+      preprocessor.transform(df)
+                     │
+                     ▼
+            model.predict()
+                     │
+                     ▼
+              JSON Response
+```
+
+---
+
+# 📂 Project Structure
 
 ```text
 Advanced_House_Price_Prediction/
 │
+├── app/
+│   ├── main.py
+│   └── schema.py
+│
 ├── artifacts/
+│   ├── model.pkl
+│   ├── preprocessor.pkl
 │   ├── raw.csv
 │   ├── train.csv
 │   ├── test.csv
-│   ├── preprocessor.pkl
 │   └── data_validation_report.txt
 │
 ├── data/
-│   └── raw/
-│       └── train.csv
+│   ├── raw/
+│   └── processed/
 │
 ├── notebooks/
 │
@@ -47,12 +106,11 @@ Advanced_House_Price_Prediction/
 │   │   ├── model_trainer.py
 │   │   └── model_evaluation.py
 │   │
-│   ├── pipeline/
 │   ├── exception.py
 │   ├── logger.py
 │   └── utils.py
 │
-├── app.py
+├── Dockerfile
 ├── requirements.txt
 ├── setup.py
 └── README.md
@@ -60,54 +118,55 @@ Advanced_House_Price_Prediction/
 
 ---
 
-# 🚀 Machine Learning Pipeline
+# ⚙️ Machine Learning Pipeline
 
 ## 1. Data Ingestion
 
-* Loads the raw dataset
-* Creates the artifacts directory
-* Saves the raw dataset
-* Splits the dataset into training and testing sets
+* Reads raw dataset
+* Creates artifact directory
+* Splits data into train and test datasets
 * Stores:
 
+  * raw.csv
   * train.csv
   * test.csv
-  * raw.csv
 
 ---
 
 ## 2. Data Validation
 
-Validates the dataset before preprocessing.
+Performs validation before preprocessing.
 
 Validation includes:
 
-* Empty dataset check
-* Dataset shape
+* Dataset availability
 * Missing values
 * Duplicate records
+* Dataset shape
 
-A validation report is generated inside the artifacts folder.
+Validation report is generated inside:
+
+```text
+artifacts/data_validation_report.txt
+```
 
 ---
 
 ## 3. Data Transformation
 
-Builds a preprocessing pipeline using Scikit-Learn.
+A Scikit-Learn preprocessing pipeline is created using **ColumnTransformer**.
 
-### Numerical Features
+### Numerical Pipeline
 
 * Median Imputation
-* Standard Scaling
+* StandardScaler
 
-### Categorical Features
+### Categorical Pipeline
 
 * Most Frequent Imputation
-* One Hot Encoding
+* OneHotEncoder
 
-The project uses **ColumnTransformer** to combine both preprocessing pipelines.
-
-The trained preprocessing object is saved as:
+The preprocessing pipeline is serialized as:
 
 ```text
 artifacts/preprocessor.pkl
@@ -117,76 +176,166 @@ artifacts/preprocessor.pkl
 
 ## 4. Model Training
 
-* Trains multiple regression models
-* Compares model performance
-* Selects the best-performing model
-* Saves the trained model
+Multiple regression algorithms are trained and compared.
 
----
-
-## 5. Model Evaluation
-
-Evaluates model performance using regression metrics such as:
+Models are evaluated using:
 
 * R² Score
-* Mean Absolute Error (MAE)
-* Mean Squared Error (MSE)
-* Root Mean Squared Error (RMSE)
+* Mean Absolute Error
+* Mean Squared Error
+* Root Mean Squared Error
+
+The best-performing model is selected and saved as:
+
+```text
+artifacts/model.pkl
+```
 
 ---
 
-## 6. Prediction Pipeline
+# 🌐 FastAPI Prediction Service
 
-Loads:
+The trained model is deployed as a REST API using **FastAPI**.
 
-* Trained Model
-* Preprocessor
+## Workflow
 
-Transforms new user input and predicts the house price.
+```text
+Client
+   │
+   ▼
+POST /predict
+   │
+   ▼
+Pydantic Validation
+   │
+   ▼
+Convert JSON → DataFrame
+   │
+   ▼
+Preprocessor
+   │
+   ▼
+Machine Learning Model
+   │
+   ▼
+Predicted House Price
+```
 
 ---
 
-# ⚙️ Technologies Used
+# 📌 API Endpoints
+
+## Home Endpoint
+
+```http
+GET /
+```
+
+Response
+
+```json
+{
+  "message": "House Price Prediction API is running..."
+}
+```
+
+---
+
+## Prediction Endpoint
+
+```http
+POST /predict
+```
+
+Sample Response
+
+```json
+{
+  "status": "success",
+  "prediction": 212175.29
+}
+```
+
+---
+
+# 🐳 Docker Support
+
+The application is fully containerized.
+
+Build Docker Image
+
+```bash
+docker build -t house-price-api .
+```
+
+Run Docker Container
+
+```bash
+docker run -p 8000:8000 house-price-api
+```
+
+API will be available at
+
+```text
+http://localhost:8000
+```
+
+Swagger Documentation
+
+```text
+http://localhost:8000/docs
+```
+
+---
+
+# 🛠 Technologies Used
 
 * Python
 * Pandas
 * NumPy
 * Scikit-Learn
+* FastAPI
+* Pydantic
+* Uvicorn
+* Docker
 * Pickle
-* Dataclasses
 * Logging
+* Dataclasses
 * Object-Oriented Programming
 
 ---
 
-# 🛠 Features
+# ✨ Features
 
-* Production-ready project structure
-* Modular pipeline architecture
-* Custom logging
-* Custom exception handling
-* Data validation report generation
+* Production-style project architecture
+* Modular ML pipeline
 * Automated preprocessing pipeline
 * Model serialization
+* FastAPI REST API
+* Pydantic request validation
+* Docker containerization
+* Interactive Swagger UI
+* Custom exception handling
+* Custom logging
 * Reusable codebase
 
 ---
 
-# ▶️ How to Run
+# ▶️ Getting Started
 
-### Clone Repository
+## Clone Repository
 
 ```bash
 git clone <repository-url>
 ```
 
-### Create Virtual Environment
+## Create Virtual Environment
 
 ```bash
 python -m venv myenv
 ```
 
-### Activate Environment
+## Activate Environment
 
 Windows
 
@@ -194,35 +343,41 @@ Windows
 myenv\Scripts\activate
 ```
 
-Linux / macOS
+Linux/macOS
 
 ```bash
 source myenv/bin/activate
 ```
 
-### Install Dependencies
+## Install Dependencies
 
 ```bash
 pip install -r requirements.txt
 ```
 
-### Run the Project
+## Run FastAPI
 
 ```bash
-python app.py
+uvicorn app.main:app --reload
+```
+
+Open Swagger UI
+
+```text
+http://127.0.0.1:8000/docs
 ```
 
 ---
 
 # 📈 Future Improvements
 
-* Hyperparameter tuning
-* Feature selection
-* Model versioning
 * MLflow integration
-* Docker containerization
+* Model versioning
+* Unit testing
 * CI/CD pipeline
-* Cloud deployment (AWS/Azure/GCP)
+* AWS EC2 deployment
+* Kubernetes deployment
+* Monitoring and observability
 
 ---
 
@@ -232,19 +387,3 @@ python app.py
 
 Machine Learning Engineer
 
-Skills:
-
-* Python
-* Machine Learning
-* Deep Learning
-* NLP
-* Transformers
-* LangChain
-* LangGraph
-* LLMs
-* RAG
-* Generative AI
-* Agentic AI
-* FastAPI
-* AWS
-* MySQL
