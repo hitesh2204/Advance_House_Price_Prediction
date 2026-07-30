@@ -40,10 +40,12 @@ class DataTransformation:
 
             target_column = "SalePrice"
 
-            input_feature_train_df = train_df.drop(columns=[target_column])
+            drop_columns = ["Id", target_column]
+
+            input_feature_train_df = train_df.drop(columns=drop_columns)
             target_feature_train_df = train_df[target_column]
 
-            input_feature_test_df = test_df.drop(columns=[target_column])
+            input_feature_test_df = test_df.drop(columns=drop_columns)
             target_feature_test_df = test_df[target_column]
 
             ### seprating numerical and categorical columns.
@@ -130,10 +132,7 @@ class DataTransformation:
             logger.error(CustomException(e,sys))
             raise CustomException(e,sys)
 
-    def get_data_transformer_object(self,
-        numerical_columns,
-        categorical_columns):
-
+    def get_data_transformer_object(self,numerical_columns,categorical_columns):
         try:
             logger.info("Creating Data Transformation Pipeline.")
 
