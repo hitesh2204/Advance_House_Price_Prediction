@@ -14,8 +14,13 @@ from sklearn.linear_model import LinearRegression
 from sklearn.linear_model import Ridge,Lasso
 from sklearn.ensemble import RandomForestRegressor,GradientBoostingRegressor
 from xgboost import XGBRegressor
-from sklearn.metrics import r2_score
+from sklearn.metrics import r2_score,mean_absolute_error,root_mean_squared_error
 from sklearn.model_selection import GridSearchCV
+
+import mlflow 
+import mlflow.sklearn
+
+import mlflow.xgboost
 
 @dataclass
 class ModelTrainerConfig:
@@ -89,6 +94,7 @@ class ModelTrainer:
                         }
 
                     }
+            mlflow.set_experiment("House Price Prediction")
 
             model_score ={}
 
@@ -120,31 +126,54 @@ class ModelTrainer:
 
             for model_name, score in top_3_models:
 
-                logger.info(f"Tuning {model_name}")
+                with mlflow.start_run(run_name=model_name):
 
-                model = models[model_name]
+                    logger.info(f"Tuning {model_name}")
 
-                param_grid = params[model_name]
+                    model = models[model_name]
 
-                grid_search = GridSearchCV(estimator= model,param_grid=param_grid,cv=5,scoring="r2", n_jobs=-1)
+                    param_grid = params[model_name]
 
-                grid_search.fit(X_train,y_train)
+                    grid_search = GridSearchCV(estimator= model,param_grid=param_grid,cv=5,scoring="r2", n_jobs=-1)
 
-                tuned_model = grid_search.best_estimator_
+                    grid_search.fit(X_train,y_train)
 
-                prediction  = tuned_model.predict(X_test)
+                    mlflow.log_param("model_name", model_name)
 
-                score = r2_score(y_test, prediction)
+                    for param_name, param_value in grid_search.best_params_.items():
+                        mlflow.log_param(param_name, param_value)
 
-                tuned_model_score[model_name] = score
+                    tuned_model = grid_search.best_estimator_
 
-                best_models[model_name] = tuned_model
+                    prediction = tuned_model.predict(X_test)
 
-                logger.info(
-                            f"{model_name} "
-                            f"Best Params: {grid_search.best_params_} "
-                            f"R2 Score: {score:.4f}"
+                    r2 = r2_score(y_test, prediction)
+                    mae = mean_absolute_error(y_test, prediction)
+                    rmse = root_mean_squared_error(y_test, prediction)
+
+                    mlflow.log_metric("R2 Score", r2)
+                    mlflow.log_metric("MAE", mae)
+                    mlflow.log_metric("RMSE", rmse)
+
+                    if isinstance(tuned_model, XGBRegressor):
+                        mlflow.xgboost.log_model(
+                            xgb_model=tuned_model,
+                            artifact_path="model"
                         )
+                    else:
+                        mlflow.sklearn.log_model(
+                            sk_model=tuned_model,
+                            artifact_path="model"
+                        )
+
+                    tuned_model_score[model_name] = r2
+                    best_models[model_name] = tuned_model
+
+                    logger.info(
+                                f"{model_name} "
+                                f"Best Params: {grid_search.best_params_} "
+                                f"R2 Score: {r2:.4f}"
+                            )
             best_model_name = max(tuned_model_score,key=tuned_model_score.get)
 
             best_model_score = tuned_model_score[best_model_name]
