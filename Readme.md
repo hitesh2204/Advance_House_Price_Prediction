@@ -1,20 +1,22 @@
 # 🏠 Advanced House Price Prediction API
 
-A production-ready end-to-end Machine Learning project that predicts house prices using the **Ames Housing Dataset**. The project follows a modular software architecture and exposes the trained model through a **FastAPI REST API**. The entire application is containerized using **Docker**, making it portable and deployment-ready.
+A production-ready end-to-end Machine Learning project that predicts house prices using the **Ames Housing Dataset**. The project follows an industry-standard modular architecture, integrates **MLflow Experiment Tracking** and **Model Registry** for model lifecycle management, exposes predictions through a **FastAPI REST API**, and is fully containerized using **Docker**.
 
 ---
 
 # 🚀 Project Overview
 
-The objective of this project is to build a scalable Machine Learning application capable of predicting house prices from various property features.
+The objective of this project is to build a scalable Machine Learning application capable of predicting house prices from various property features while following production-grade MLOps practices.
 
-The project follows industry-standard software engineering practices, including:
+The project includes:
 
 * Modular project architecture
 * Object-Oriented Programming (OOP)
 * Data preprocessing pipelines
-* Model training and evaluation
-* Model serialization
+* Hyperparameter tuning
+* MLflow Experiment Tracking
+* MLflow Model Registry
+* Production model management
 * FastAPI REST API
 * Pydantic request validation
 * Docker containerization
@@ -26,51 +28,57 @@ The project follows industry-standard software engineering practices, including:
 # 🏗 Project Architecture
 
 ```text
-                        Training Pipeline
+                           Training Pipeline
 
-                Raw Dataset
-                     │
-                     ▼
-              Data Ingestion
-                     │
-                     ▼
-             Data Validation
-                     │
-                     ▼
-          Data Transformation
-                     │
-                     ▼
-             Model Training
-                     │
-                     ▼
-            Model Evaluation
-                     │
-                     ▼
-        model.pkl + preprocessor.pkl
-                     │
-──────────────────────────────────────────────────────
+                     Raw Dataset
+                          │
+                          ▼
+                   Data Ingestion
+                          │
+                          ▼
+                  Data Validation
+                          │
+                          ▼
+               Data Transformation
+                          │
+                          ▼
+                  Model Training
+                          │
+                          ▼
+             Hyperparameter Tuning
+                          │
+                          ▼
+             MLflow Experiment Tracking
+                          │
+                          ▼
+              MLflow Model Registry
+                          │
+                          ▼
+                 Production Pipeline
 
-                  Inference Pipeline
+────────────────────────────────────────────────────────────────────────
 
-            FastAPI Prediction API
-                     │
-                     ▼
-             JSON Request Body
-                     │
-                     ▼
-          Pydantic Validation
-                     │
-                     ▼
-             Pandas DataFrame
-                     │
-                     ▼
-      preprocessor.transform(df)
-                     │
-                     ▼
-            model.predict()
-                     │
-                     ▼
-              JSON Response
+                          Inference Pipeline
+
+                  FastAPI Prediction API
+                          │
+                          ▼
+                    JSON Request
+                          │
+                          ▼
+                 Pydantic Validation
+                          │
+                          ▼
+                 Pandas DataFrame
+                          │
+                          ▼
+        Load Production Pipeline from MLflow Registry
+                          │
+                          ▼
+                  Pipeline.predict()
+                          │
+                          ▼
+                   JSON Response
 ```
 
 ---
@@ -85,16 +93,17 @@ Advanced_House_Price_Prediction/
 │   └── schema.py
 │
 ├── artifacts/
-│   ├── model.pkl
-│   ├── preprocessor.pkl
 │   ├── raw.csv
 │   ├── train.csv
 │   ├── test.csv
+│   ├── model.pkl
 │   └── data_validation_report.txt
 │
 ├── data/
 │   ├── raw/
 │   └── processed/
+│
+├── mlruns/
 │
 ├── notebooks/
 │
@@ -122,29 +131,30 @@ Advanced_House_Price_Prediction/
 
 ## 1. Data Ingestion
 
-* Reads raw dataset
-* Creates artifact directory
-* Splits data into train and test datasets
-* Stores:
+Responsibilities:
 
-  * raw.csv
-  * train.csv
-  * test.csv
+* Reads the raw dataset
+* Creates the artifacts directory
+* Splits data into train and test datasets
+
+Generated artifacts:
+
+* raw.csv
+* train.csv
+* test.csv
 
 ---
 
 ## 2. Data Validation
 
-Performs validation before preprocessing.
-
-Validation includes:
+Validation checks include:
 
 * Dataset availability
 * Missing values
 * Duplicate records
 * Dataset shape
 
-Validation report is generated inside:
+Validation report:
 
 ```text
 artifacts/data_validation_report.txt
@@ -154,7 +164,7 @@ artifacts/data_validation_report.txt
 
 ## 3. Data Transformation
 
-A Scikit-Learn preprocessing pipeline is created using **ColumnTransformer**.
+A preprocessing pipeline is created using **Scikit-Learn ColumnTransformer**.
 
 ### Numerical Pipeline
 
@@ -166,59 +176,89 @@ A Scikit-Learn preprocessing pipeline is created using **ColumnTransformer**.
 * Most Frequent Imputation
 * OneHotEncoder
 
-The preprocessing pipeline is serialized as:
-
-```text
-artifacts/preprocessor.pkl
-```
+The preprocessing object is later combined with the trained model into a single Scikit-Learn **Pipeline**.
 
 ---
 
 ## 4. Model Training
 
-Multiple regression algorithms are trained and compared.
+Multiple regression algorithms are trained:
 
-Models are evaluated using:
+* Linear Regression
+* Ridge
+* Lasso
+* Random Forest
+* Gradient Boosting
+* XGBoost
+
+The models are initially evaluated using:
 
 * R² Score
-* Mean Absolute Error
-* Mean Squared Error
-* Root Mean Squared Error
 
-The best-performing model is selected and saved as:
+The top-performing models are then hyperparameter tuned using **GridSearchCV**.
 
-```text
-artifacts/model.pkl
-```
+Final evaluation metrics:
+
+* R² Score
+* Mean Absolute Error (MAE)
+* Root Mean Squared Error (RMSE)
+
+---
+
+# 📊 MLflow Integration
+
+The project integrates **MLflow** for experiment tracking and model lifecycle management.
+
+## Experiment Tracking
+
+Each experiment automatically logs:
+
+* Model Name
+* Hyperparameters
+* Evaluation Metrics
+* Trained Pipeline Artifact
+
+Tracked Metrics:
+
+* R² Score
+* MAE
+* RMSE
+
+---
+
+## Model Registry
+
+After selecting the best-performing model:
+
+* The complete Scikit-Learn Pipeline (Preprocessor + Model) is registered in the **MLflow Model Registry**.
+* The production version is promoted through the registry.
+* FastAPI always loads the current Production model.
+
+This eliminates the need to manually manage separate preprocessing and model files during inference.
 
 ---
 
 # 🌐 FastAPI Prediction Service
 
-The trained model is deployed as a REST API using **FastAPI**.
+The production pipeline is loaded directly from the **MLflow Model Registry**.
 
-## Workflow
+Workflow:
 
 ```text
 Client
    │
-   ▼
 POST /predict
    │
-   ▼
 Pydantic Validation
    │
-   ▼
 Convert JSON → DataFrame
    │
-   ▼
-Preprocessor
+Load Production Pipeline
+from MLflow Model Registry
    │
-   ▼
-Machine Learning Model
+Pipeline.predict()
    │
-   ▼
-Predicted House Price
+Prediction Response
 ```
 
 ---
@@ -262,25 +302,25 @@ Sample Response
 
 The application is fully containerized.
 
-Build Docker Image
+## Build Docker Image
 
 ```bash
 docker build -t house-price-api .
 ```
 
-Run Docker Container
+## Run Docker Container
 
 ```bash
 docker run -p 8000:8000 house-price-api
 ```
 
-API will be available at
+Application:
 
 ```text
 http://localhost:8000
 ```
 
-Swagger Documentation
+Swagger UI:
 
 ```text
 http://localhost:8000/docs
@@ -294,9 +334,13 @@ http://localhost:8000/docs
 * Pandas
 * NumPy
 * Scikit-Learn
+* Scikit-Learn Pipeline
+* GridSearchCV
+* XGBoost
 * FastAPI
 * Pydantic
 * Uvicorn
+* MLflow
 * Docker
 * Pickle
 * Logging
@@ -310,7 +354,10 @@ http://localhost:8000/docs
 * Production-style project architecture
 * Modular ML pipeline
 * Automated preprocessing pipeline
-* Model serialization
+* Hyperparameter Optimization
+* MLflow Experiment Tracking
+* MLflow Model Registry
+* Production model loading
 * FastAPI REST API
 * Pydantic request validation
 * Docker containerization
@@ -337,13 +384,13 @@ python -m venv myenv
 
 ## Activate Environment
 
-Windows
+### Windows
 
 ```bash
 myenv\Scripts\activate
 ```
 
-Linux/macOS
+### Linux/macOS
 
 ```bash
 source myenv/bin/activate
@@ -355,13 +402,23 @@ source myenv/bin/activate
 pip install -r requirements.txt
 ```
 
+## Start MLflow Server
+
+```bash
+mlflow server \
+--backend-store-uri sqlite:///mlflow.db \
+--default-artifact-root ./mlruns \
+--host 0.0.0.0 \
+--port 5000
+```
+
 ## Run FastAPI
 
 ```bash
 uvicorn app.main:app --reload
 ```
 
-Open Swagger UI
+Swagger UI:
 
 ```text
 http://127.0.0.1:8000/docs
@@ -371,13 +428,13 @@ http://127.0.0.1:8000/docs
 
 # 📈 Future Improvements
 
-* MLflow integration
-* Model versioning
-* Unit testing
-* CI/CD pipeline
-* AWS EC2 deployment
-* Kubernetes deployment
-* Monitoring and observability
+* GitHub Actions CI/CD
+* Docker Compose
+* AWS Deployment (EC2, ECR, ECS/App Runner)
+* Kubernetes Deployment
+* Model Monitoring
+* Data Version Control (DVC)
+* Monitoring & Observability (Prometheus/Grafana)
 
 ---
 
@@ -386,4 +443,3 @@ http://127.0.0.1:8000/docs
 **Hitesh Yerekar**
 
 Machine Learning Engineer
-
