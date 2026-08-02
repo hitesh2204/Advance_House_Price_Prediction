@@ -4,6 +4,7 @@ import numpy as np
 import os
 import sys
 import pickle
+from sklearn.pipeline import Pipeline
 
 from src.exception import CustomException
 from src.logger import logger
@@ -21,6 +22,10 @@ import mlflow
 import mlflow.sklearn
 
 import mlflow.xgboost
+
+with open("artifacts//preprocessor.pkl","rb") as file:
+
+    preprocessor = pickle.load(file)
 
 @dataclass
 class ModelTrainerConfig:
@@ -155,19 +160,18 @@ class ModelTrainer:
                     mlflow.log_metric("MAE", mae)
                     mlflow.log_metric("RMSE", rmse)
 
-                    if isinstance(tuned_model, XGBRegressor):
-                        mlflow.xgboost.log_model(
-                            xgb_model=tuned_model,
-                            artifact_path="model"
-                        )
-                    else:
-                        mlflow.sklearn.log_model(
-                            sk_model=tuned_model,
+                    pipeline = Pipeline([
+                                            ("preprocessor", preprocessor),
+                                            ("model", tuned_model)
+                                        ])
+                    
+                    mlflow.sklearn.log_model(
+                            sk_model=pipeline,
                             artifact_path="model"
                         )
 
                     tuned_model_score[model_name] = r2
-                    best_models[model_name] = tuned_model
+                    best_models[model_name] = pipeline
 
                     logger.info(
                                 f"{model_name} "
