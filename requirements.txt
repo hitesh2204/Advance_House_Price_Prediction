@@ -8,3 +8,7 @@ mlflow
 joblib
 pydantic
 scipy
+flake8
+black
+isort
+pytest
