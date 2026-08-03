@@ -40,9 +40,18 @@ jobs:
         run : |
           docker run -d --name house-api -p 8000:8000 house-price-api 
 
-      - name : test api
-        run : |
-          curl http://localhost:8000
+      - name: Wait for API
+        run: sleep 10
+
+      - name: Show running containers
+        run: docker ps -a
+
+      - name: Show container logs
+        if: always()
+        run: docker logs house-api
+
+      - name: Test API
+        run: curl http://localhost:8000
 
       
 
