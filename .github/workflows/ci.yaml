@@ -32,6 +32,14 @@ jobs:
         run : |
           python -c "from app.main import app; print('FASTAPI app imported successfully')"
 
+      - name : Build docker image
+        run : |
+          docker build -t house-price-api 
+
+      
+
+      
+
 
         
 
