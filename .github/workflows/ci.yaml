@@ -34,7 +34,7 @@ jobs:
 
       - name : Build docker image
         run : |
-          docker build -t house-price-api 
+          docker build -t house-price-api .
 
       
 
