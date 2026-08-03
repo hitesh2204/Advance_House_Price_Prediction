@@ -6,28 +6,20 @@ import pandas as pd
 from src.exception import CustomException
 from src.logger import logger
 
+import mlflow
 import os
 import sys
 
-def load_preprocessor():
-    with open("artifacts//preprocessor.pkl",'rb') as file:
-        preprocessor_obj = pickle.load(file)
-    return preprocessor_obj
+#pipeline = mlflow.pyfunc.load_model("artifacts/model")
 
-def load_model():
-    with open("artifacts//model.pkl","rb") as file:
-        model_obj = pickle.load(file)
-    return model_obj
+with open("artifacts//model.pkl","rb") as f:
+    pipeline = pickle.load(f)
 
 app = FastAPI(
     title="House Price Prediction API",
     version="1.0.0",
     description="House Price Prediction using Machine Learning"
 )
-
-preprocessor = load_preprocessor()
-model = load_model()
-
 
 @app.get("/")
 def home():
@@ -44,11 +36,7 @@ def predict(data: HouseData):
 
         logger.info("User data successfully loaded")
 
-        preprocess_data = preprocessor.transform(df)
-
-        logger.info("Successfully preprocessed data")
-
-        prediction = model.predict(preprocess_data)
+        prediction = pipeline.predict(df)
 
         logger.info("Prediction done successfully")
 
