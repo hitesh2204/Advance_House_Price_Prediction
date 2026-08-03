@@ -1,14 +1,14 @@
 name: House Price Prediction CI
 
 on:
-  Push:
+  push:
 
-Jobs:
+jobs:
 
   build:
 
      runs-on: ubuntu-latest
 
-     
+
 
 
