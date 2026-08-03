@@ -40,18 +40,18 @@ class DataValidation:
                 validation_status = False
                 report.append("Test dataset is empty")
 
-            ## Checking dataset shape
+            # Checking dataset shape
             report.append(f"Train shape:{train_df.shape}")
             report.append(f"Test shape:{test_df.shape}")
 
-            ## checking missing values in dataset.
+            # checking missing values in dataset.
             train_missing_data = train_df.isnull().sum()
             test_missing_data = test_df.isnull().sum()
 
             report.append(f"Train missing values:{train_missing_data}")
             report.append(f"Test missing values:{test_missing_data}")
 
-            ## checking the duplicates data.
+            # checking the duplicates data.
             train_duplicated_data = train_df.duplicated().sum()
             test_duplicated_data = test_df.duplicated().sum()
 
@@ -66,7 +66,7 @@ class DataValidation:
                 report.append("Data validation failed")
                 logger.info("Data validation failed")
 
-            ## save validation report.
+            # save validation report.
 
             with open(self.validation_config.data_validation_path, "w") as file:
                 for line in report:

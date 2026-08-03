@@ -6,8 +6,6 @@ import pandas as pd
 from src.exception import CustomException
 from src.logger import logger
 
-import mlflow
-import os
 import sys
 
 # pipeline = mlflow.pyfunc.load_model("artifacts/model")
