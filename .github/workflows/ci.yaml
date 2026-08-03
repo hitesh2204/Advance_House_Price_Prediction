@@ -2,6 +2,8 @@ name: House Price Prediction CI
 
 on:
   push:
+     branches:
+      - master
 
 jobs:
 
