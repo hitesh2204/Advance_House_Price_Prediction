@@ -40,6 +40,10 @@ jobs:
         run : |
           docker run -d --name house-api -p 8000:8000 house-price-api 
 
+      - name : test api
+        run : |
+          curl http://localhost:8000
+
       
 
       
