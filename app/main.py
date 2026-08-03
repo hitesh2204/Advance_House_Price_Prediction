@@ -10,22 +10,22 @@ import mlflow
 import os
 import sys
 
-#pipeline = mlflow.pyfunc.load_model("artifacts/model")
+# pipeline = mlflow.pyfunc.load_model("artifacts/model")
 
-with open("artifacts//model.pkl","rb") as f:
+with open("artifacts//model.pkl", "rb") as f:
     pipeline = pickle.load(f)
 
 app = FastAPI(
     title="House Price Prediction API",
     version="1.0.0",
-    description="House Price Prediction using Machine Learning"
+    description="House Price Prediction using Machine Learning",
 )
+
 
 @app.get("/")
 def home():
-    return {
-        "message": "House Price Prediction API is running..."
-    }
+    return {"message": "House Price Prediction API is running..."}
+
 
 @app.post("/predict")
 def predict(data: HouseData):
@@ -40,14 +40,7 @@ def predict(data: HouseData):
 
         logger.info("Prediction done successfully")
 
-        return {
-            "status": "success",
-            "prediction": float(prediction[0])
-        }
+        return {"status": "success", "prediction": float(prediction[0])}
     except Exception as e:
-
-        logger.error(str(CustomException(e,sys)))
-        raise CustomException(e,sys)
-
-        
-
+        logger.error(str(CustomException(e, sys)))
+        raise CustomException(e, sys)

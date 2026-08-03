@@ -15,21 +15,21 @@ import os
 import sys
 import pickle
 
+
 @dataclass
 class DataTransformationConfig:
+    preprocessor_obj_file_path: str = os.path.join("artifacts", "preprocessor.pkl")
 
-    preprocessor_obj_file_path:str = os.path.join("artifacts","preprocessor.pkl")
+    train_processed_path: str = os.path.join("data", "processed", "train_processed.csv")
 
-    train_processed_path:str = os.path.join("data","processed","train_processed.csv")
+    test_processed_path: str = os.path.join("data", "processed", "test_processed.csv")
 
-    test_processed_path:str = os.path.join("data","processed","test_processed.csv")
 
 class DataTransformation:
-
     def __init__(self):
         self.data_transformation_config = DataTransformationConfig()
 
-    def initiate_data_transformation(self,train_data_path,test_data_path):
+    def initiate_data_transformation(self, train_data_path, test_data_path):
         try:
             logger.info("Data transformation Started..")
 
@@ -57,21 +57,17 @@ class DataTransformation:
                 include=["object", "string"]
             ).columns
 
-            logger.info(
-            "Numerical and categorical columns identified successfully."
-            )
+            logger.info("Numerical and categorical columns identified successfully.")
 
-            preprocessor = self.get_data_transformer_object(numerical_columns,categorical_columns)
+            preprocessor = self.get_data_transformer_object(
+                numerical_columns, categorical_columns
+            )
 
             logger.info("Applying preprocessing object on training and testing data.")
 
-            input_feature_train_arr = preprocessor.fit_transform(
-                input_feature_train_df
-            )
+            input_feature_train_arr = preprocessor.fit_transform(input_feature_train_df)
 
-            input_feature_test_arr = preprocessor.transform(
-                input_feature_test_df
-            )
+            input_feature_test_arr = preprocessor.transform(input_feature_test_df)
 
             # Convert sparse matrix to dense NumPy array (if required)
             if hasattr(input_feature_train_arr, "toarray"):
@@ -92,33 +88,39 @@ class DataTransformation:
             logger.info("Saving preprocessing object.")
 
             with open(
-                self.data_transformation_config.preprocessor_obj_file_path,
-                "wb"
+                self.data_transformation_config.preprocessor_obj_file_path, "wb"
             ) as file:
                 pickle.dump(preprocessor, file)
 
             logger.info("Preprocessor object saved successfully.")
 
             train_arr = np.c_[
-                input_feature_train_arr,
-                target_feature_train_df.to_numpy()
+                input_feature_train_arr, target_feature_train_df.to_numpy()
             ]
 
-            test_arr = np.c_[
-                input_feature_test_arr,
-                target_feature_test_df.to_numpy()
-            ]
+            test_arr = np.c_[input_feature_test_arr, target_feature_test_df.to_numpy()]
 
             logger.info(f"Final train array shape: {train_arr.shape}")
             logger.info(f"Final test array shape: {test_arr.shape}")
 
-            logger.info("Training and Testing arrays created successfully.")    
+            logger.info("Training and Testing arrays created successfully.")
 
-            os.makedirs(os.path.dirname(self.data_transformation_config.train_processed_path),exist_ok= True)
+            os.makedirs(
+                os.path.dirname(self.data_transformation_config.train_processed_path),
+                exist_ok=True,
+            )
 
-            pd.DataFrame(train_arr).to_csv(self.data_transformation_config.train_processed_path,index=False,header=True)
+            pd.DataFrame(train_arr).to_csv(
+                self.data_transformation_config.train_processed_path,
+                index=False,
+                header=True,
+            )
 
-            pd.DataFrame(test_arr).to_csv(self.data_transformation_config.test_processed_path,index=False,header=True)
+            pd.DataFrame(test_arr).to_csv(
+                self.data_transformation_config.test_processed_path,
+                index=False,
+                header=True,
+            )
 
             logger.info("Train and Test processed file created successfully")
             print("Train and Test processed file created successfully")
@@ -126,39 +128,27 @@ class DataTransformation:
             return (
                 self.data_transformation_config.train_processed_path,
                 self.data_transformation_config.test_processed_path,
-                self.data_transformation_config.preprocessor_obj_file_path
+                self.data_transformation_config.preprocessor_obj_file_path,
             )
         except Exception as e:
-            logger.error(CustomException(e,sys))
-            raise CustomException(e,sys)
+            logger.error(CustomException(e, sys))
+            raise CustomException(e, sys)
 
-    def get_data_transformer_object(self,numerical_columns,categorical_columns):
+    def get_data_transformer_object(self, numerical_columns, categorical_columns):
         try:
             logger.info("Creating Data Transformation Pipeline.")
 
             numerical_pipeline = Pipeline(
                 steps=[
-                    (
-                        "imputer",
-                        SimpleImputer(strategy="median")
-                    ),
-                    (
-                        "scaler",
-                        StandardScaler()
-                    )
+                    ("imputer", SimpleImputer(strategy="median")),
+                    ("scaler", StandardScaler()),
                 ]
             )
 
             categorical_pipeline = Pipeline(
                 steps=[
-                    (
-                        "imputer",
-                        SimpleImputer(strategy="most_frequent")
-                    ),
-                    (
-                        "one_hot_encoder",
-                        OneHotEncoder(handle_unknown="ignore")
-                    )
+                    ("imputer", SimpleImputer(strategy="most_frequent")),
+                    ("one_hot_encoder", OneHotEncoder(handle_unknown="ignore")),
                 ]
             )
 
@@ -166,16 +156,8 @@ class DataTransformation:
 
             preprocessor = ColumnTransformer(
                 transformers=[
-                    (
-                        "numerical_pipeline",
-                        numerical_pipeline,
-                        numerical_columns
-                    ),
-                    (
-                        "categorical_pipeline",
-                        categorical_pipeline,
-                        categorical_columns
-                    )
+                    ("numerical_pipeline", numerical_pipeline, numerical_columns),
+                    ("categorical_pipeline", categorical_pipeline, categorical_columns),
                 ]
             )
 
@@ -184,12 +166,11 @@ class DataTransformation:
             return preprocessor
 
         except Exception as e:
-
             logger.error(CustomException(e, sys))
             raise CustomException(e, sys)
 
-if __name__=="__main__":
 
+if __name__ == "__main__":
     data = DataTransformation()
 
     initiate_data = DataIngestionConfig()
@@ -197,4 +178,4 @@ if __name__=="__main__":
     train_data = initiate_data.train_data_path
     test_data = initiate_data.test_data_path
 
-    data.initiate_data_transformation(train_data,test_data)
+    data.initiate_data_transformation(train_data, test_data)

@@ -3,11 +3,10 @@ from pydantic import BaseModel, Field
 
 
 class HouseData(BaseModel):
-
-    MSSubClass: Annotated[int, Field(...,description="Building class")]
-    MSZoning: Annotated[str, Field(...,description="General zoning classification")]
+    MSSubClass: Annotated[int, Field(..., description="Building class")]
+    MSZoning: Annotated[str, Field(..., description="General zoning classification")]
     LotFrontage: Annotated[Optional[float], Field(default=None)]
-    LotArea: Annotated[int, Field(...,gt=0)]
+    LotArea: Annotated[int, Field(..., gt=0)]
     Street: Annotated[str, Field(...)]
     Alley: Annotated[Optional[str], Field(default=None)]
     LotShape: Annotated[str, Field(...)]
@@ -20,8 +19,8 @@ class HouseData(BaseModel):
     Condition2: Annotated[str, Field(...)]
     BldgType: Annotated[str, Field(...)]
     HouseStyle: Annotated[str, Field(...)]
-    OverallQual: Annotated[int, Field(...,ge=1, le=10)]
-    OverallCond: Annotated[int, Field(...,ge=1, le=10)]
+    OverallQual: Annotated[int, Field(..., ge=1, le=10)]
+    OverallCond: Annotated[int, Field(..., ge=1, le=10)]
     YearBuilt: Annotated[Optional[int], Field(default=None)]
     YearRemodAdd: Annotated[int, Field(...)]
     RoofStyle: Annotated[str, Field(...)]
@@ -46,8 +45,8 @@ class HouseData(BaseModel):
     HeatingQC: Annotated[str, Field(...)]
     CentralAir: Annotated[str, Field(...)]
     Electrical: Annotated[Optional[str], Field(default=None)]
-    FirstFlrSF: Annotated[int, Field(...,alias="1stFlrSF")]
-    SecondFlrSF: Annotated[int, Field(...,alias="2ndFlrSF")]
+    FirstFlrSF: Annotated[int, Field(..., alias="1stFlrSF")]
+    SecondFlrSF: Annotated[int, Field(..., alias="2ndFlrSF")]
     LowQualFinSF: Annotated[int, Field(...)]
     GrLivArea: Annotated[int, Field(...)]
     BsmtFullBath: Annotated[int, Field(...)]
@@ -72,7 +71,7 @@ class HouseData(BaseModel):
     WoodDeckSF: Annotated[int, Field(...)]
     OpenPorchSF: Annotated[int, Field(...)]
     EnclosedPorch: Annotated[int, Field(...)]
-    ThreeSsnPorch: Annotated[int, Field(...,alias="3SsnPorch")]
+    ThreeSsnPorch: Annotated[int, Field(..., alias="3SsnPorch")]
     ScreenPorch: Annotated[int, Field(...)]
     PoolArea: Annotated[int, Field(...)]
     PoolQC: Annotated[Optional[str], Field(default=None)]
@@ -84,6 +83,4 @@ class HouseData(BaseModel):
     SaleType: Annotated[str, Field(...)]
     SaleCondition: Annotated[str, Field(...)]
 
-    model_config = {
-        "populate_by_name": True
-    }
+    model_config = {"populate_by_name": True}

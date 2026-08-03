@@ -5,7 +5,7 @@ import pickle
 
 import pandas as pd
 import numpy as np
-from sklearn.metrics import r2_score,mean_absolute_error,mean_squared_error
+from sklearn.metrics import r2_score, mean_absolute_error, mean_squared_error
 
 from src.exception import CustomException
 from src.logger import logger
@@ -13,26 +13,23 @@ from src.logger import logger
 
 @dataclass
 class ModelEvaluationConfig:
+    accepted_model_path: str = os.path.join("artifacts", "model.pkl")
 
-    accepted_model_path:str = os.path.join("artifacts","model.pkl")
 
 class ModelEvaluation:
-
     def __init__(self):
-
         self.model_evaluation_config = ModelEvaluationConfig()
 
-    def initiate_model_evaluation(self,processed_test_path):
+    def initiate_model_evaluation(self, processed_test_path):
         try:
             logger.info("Loding the processed test file")
 
             test_df = pd.read_csv(processed_test_path)
 
-            X_test = test_df.iloc[:,:-1].values
-            y_test = test_df.iloc[:,-1].values
+            X_test = test_df.iloc[:, :-1].values
+            y_test = test_df.iloc[:, -1].values
 
-            with open(self.model_evaluation_config.accepted_model_path,'rb')as file:
-
+            with open(self.model_evaluation_config.accepted_model_path, "rb") as file:
                 logger.info("Loading the model.")
                 model = pickle.load(file)
 
@@ -50,25 +47,9 @@ class ModelEvaluation:
                 f"MSE Score : {mse:.4f}\n"
                 f"RMSE Score: {rmse:.4f}"
             )
-            return {
-                    'r2_score':r2,
-                    'mae':mae,
-                    'mse':mse,
-                    'rmse':rmse  
-                    }
+            return {"r2_score": r2, "mae": mae, "mse": mse, "rmse": rmse}
 
         except Exception as e:
+            logger.error(CustomException(e, sys))
 
-            logger.error(CustomException(e,sys))
-
-            raise CustomException(e,sys)
-
-        
-        
-
-
-
-
-            
-       
-
+            raise CustomException(e, sys)

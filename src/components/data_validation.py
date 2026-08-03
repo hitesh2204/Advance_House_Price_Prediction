@@ -12,21 +12,19 @@ from dataclasses import dataclass
 
 @dataclass
 class DataValidationConfig:
+    data_validation_path: str = os.path.join("artifacts", "data_validation_report.txt")
 
-    data_validation_path:str = os.path.join("artifacts","data_validation_report.txt")
 
 class DataValidation:
-
     def __init__(self):
         self.validation_config = DataValidationConfig()
 
-    def initiate_data_validation(self,train_data,test_data):
-
+    def initiate_data_validation(self, train_data, test_data):
         try:
             logger.info("Data Validation Started")
 
             train_df = pd.read_csv(train_data)
-            test_df= pd.read_csv(test_data)
+            test_df = pd.read_csv(test_data)
 
             logger.info("Train and Test data loaded successfully.")
 
@@ -70,7 +68,7 @@ class DataValidation:
 
             ## save validation report.
 
-            with open(self.validation_config.data_validation_path,'w') as file:
+            with open(self.validation_config.data_validation_path, "w") as file:
                 for line in report:
                     file.write(line + "\n")
             logger.info("Validation report generated successfully.")
@@ -78,18 +76,16 @@ class DataValidation:
             return validation_status
 
         except Exception as e:
+            logger.error(CustomException(e, sys))
 
-            logger.error(CustomException(e,sys))
-
-            raise CustomException(e,sys)
+            raise CustomException(e, sys)
 
 
-if __name__ =="__main__":
-
+if __name__ == "__main__":
     data = DataValidation()
     ingestion_config = DataIngestionConfig()
 
     train_data = ingestion_config.train_data_path
     test_data = ingestion_config.test_data_path
 
-    data.initiate_data_validation(train_data,test_data)
+    data.initiate_data_validation(train_data, test_data)

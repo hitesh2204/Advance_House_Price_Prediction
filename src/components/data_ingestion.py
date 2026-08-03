@@ -12,18 +12,15 @@ from src.exception import CustomException
 
 @dataclass
 class DataIngestionConfig:
+    train_data_path: str = os.path.join("artifacts", "train.csv")
 
-    train_data_path:str = os.path.join("artifacts","train.csv")
+    test_data_path: str = os.path.join("artifacts", "test.csv")
 
-    test_data_path:str = os.path.join("artifacts","test.csv")
-
-    raw_data_path:str = os.path.join("artifacts","raw.csv")
+    raw_data_path: str = os.path.join("artifacts", "raw.csv")
 
 
 class DataIngestion:
-
     def __init__(self):
-
         self.ingestion_config = DataIngestionConfig()
 
     def initiate_data_ingestion(self):
@@ -34,37 +31,39 @@ class DataIngestion:
 
             logger.info("Dataset loaded successfully")
 
-            os.makedirs("artifacts",exist_ok=True)
+            os.makedirs("artifacts", exist_ok=True)
 
             logger.info("artifacts folder created successfully.")
 
-            df.to_csv(self.ingestion_config.raw_data_path,index=False,header=True)
+            df.to_csv(self.ingestion_config.raw_data_path, index=False, header=True)
 
             logger.info("Raw dataset saved into artifacts folder.")
 
-            train_set, test_set = train_test_split(df,test_size=0.2,random_state=42)
+            train_set, test_set = train_test_split(df, test_size=0.2, random_state=42)
 
             logger.info("Train-Test split completed successfully.")
 
-            train_set.to_csv(self.ingestion_config.train_data_path,index=False,header=True)
+            train_set.to_csv(
+                self.ingestion_config.train_data_path, index=False, header=True
+            )
             logger.info("Train dataset saved to artifacts/train.csv")
 
-            test_set.to_csv(self.ingestion_config.test_data_path,index=False,header=True)
+            test_set.to_csv(
+                self.ingestion_config.test_data_path, index=False, header=True
+            )
             logger.info("Test dataset saved to artifacts/test.csv")
 
             return (
-            self.ingestion_config.train_data_path,
-            self.ingestion_config.test_data_path
+                self.ingestion_config.train_data_path,
+                self.ingestion_config.test_data_path,
             )
-            
+
         except Exception as e:
+            logger.error(CustomException(e, sys))
 
-            logger.error(CustomException(e,sys))
-
-            raise CustomException(e,sys)
+            raise CustomException(e, sys)
 
 
-if __name__=="__main__":
-
-    data =  DataIngestion()
+if __name__ == "__main__":
+    data = DataIngestion()
     data.initiate_data_ingestion()
